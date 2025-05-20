@@ -2,8 +2,6 @@ spring.application.name=plexmediahelper
 
 server.port=${SERVER_PORT}
 
-#all \ must be escaped 3 times and value not between ""
-#transmission.dir.name=\\\\\\\\nas326\\\\transmission\\\\
 movies.extensions=.mkv,.mp4
 filenames.exceptions=.*[Uu]demy.*,.*[Ss]killshare.*,.*[Ss]ubs[Pp]lease.*,.*[Cc]ertified.*
 
