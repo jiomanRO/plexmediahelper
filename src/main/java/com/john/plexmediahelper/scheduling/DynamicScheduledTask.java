@@ -13,6 +13,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -29,6 +30,9 @@ public class DynamicScheduledTask {
     private final ThreadPoolTaskScheduler scheduler;
     private ScheduledFuture<?> scheduledFuture;
     private String currentCron;
+
+    @Value("${scheduling.timezone}")
+    private String timezone;
     @Autowired
     ContentProcessor contentProcessor;
     @Autowired
@@ -115,9 +119,9 @@ public class DynamicScheduledTask {
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
             scheduledFuture.cancel(false);
         }
-        scheduledFuture = scheduler.schedule(task, new CronTrigger(cron));
+        scheduledFuture = scheduler.schedule(task, new CronTrigger(cron, ZoneId.of(timezone)));
         currentCron = cron;
-        LOGGER.info("Scheduled task with cron: " + cron);
+        LOGGER.info("Scheduled task with cron: " + cron + " in timezone: " + ZoneId.of(timezone));
     }
 
     public synchronized String getCurrentCron() {
