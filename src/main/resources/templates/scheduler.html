@@ -117,7 +117,8 @@
         //console.log("Page fully loaded");
         //console.log("Initializing DataTables...");
         const table = $('#runsTable').DataTable({
-            responsive: true
+            responsive: true,
+            order: [[1, 'desc']]
         });
     });
 </script>
