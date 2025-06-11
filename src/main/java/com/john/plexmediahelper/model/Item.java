@@ -1,21 +1,21 @@
 package com.john.plexmediahelper.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.List;
 
 public class Item {
     private String name;
     private String type;
 
     private String contentType;
+
+    private List<String> genre;
     private String status;
 
-    public Item (String name, String type, String contentType, String status) {
+    public Item (String name, String type, String contentType, List<String> genre, String status) {
         this.name = name;
         this.type = type;
         this.contentType = contentType;
+        this.genre = genre;
         this.status = status;
     }
 
@@ -41,6 +41,14 @@ public class Item {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    public List<String> getGenre() {
+        return genre;
+    }
+
+    public void setGenre(List<String> genre) {
+        this.genre = genre;
     }
 
     public String getStatus() {

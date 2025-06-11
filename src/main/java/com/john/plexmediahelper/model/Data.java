@@ -14,8 +14,10 @@ public class Data {
     ArrayList<String> dirList;
     ArrayList<String> TVShowsDirList;
     ArrayList<String> MoviesList;
+    ArrayList<String> KidsList;
     ArrayList<String> currentMoviesLinks;
     ArrayList<String> currentTVShowsLinks;
+    ArrayList<String> currentKidsLinks;
 
     ArrayList<String> invalidLinks;
 
@@ -25,8 +27,10 @@ public class Data {
         dirList = new ArrayList<>();
         TVShowsDirList = new ArrayList<>();
         MoviesList = new ArrayList<>();
+        KidsList = new ArrayList<>();
         currentMoviesLinks = new ArrayList<>();
         currentTVShowsLinks = new ArrayList<>();
+        currentKidsLinks = new ArrayList<>();
         invalidLinks = new ArrayList<>();
     }
 
@@ -100,5 +104,21 @@ public class Data {
 
     public void setInvalidLinks(ArrayList<String> invalidLinks) {
         this.invalidLinks = invalidLinks;
+    }
+
+    public ArrayList<String> getKidsList() {
+        return KidsList;
+    }
+
+    public void setKidsList(ArrayList<String> kidsList) {
+        KidsList = kidsList;
+    }
+
+    public ArrayList<String> getCurrentKidsLinks() {
+        return currentKidsLinks;
+    }
+
+    public void setCurrentKidsLinks(ArrayList<String> currentKidsLinks) {
+        this.currentKidsLinks = currentKidsLinks;
     }
 }

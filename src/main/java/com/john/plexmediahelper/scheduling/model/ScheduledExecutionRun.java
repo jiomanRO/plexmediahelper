@@ -16,6 +16,8 @@ public class ScheduledExecutionRun {
     int moviesLinksCountAfter;
     int tvShowsLinksCountBefore;
     int tvShowsLinksCountAfter;
+    int kidsLinksCountBefore;
+    int kidsLinksCountAfter;
     int missingLinksCountBefore;
     int missingLinksCountAfter;
     int invalidLinksCountBefore;
@@ -165,5 +167,21 @@ public class ScheduledExecutionRun {
 
     public void setDetail(String detail) {
         this.detail = detail;
+    }
+
+    public int getKidsLinksCountBefore() {
+        return kidsLinksCountBefore;
+    }
+
+    public void setKidsLinksCountBefore(int kidsLinksCountBefore) {
+        this.kidsLinksCountBefore = kidsLinksCountBefore;
+    }
+
+    public int getKidsLinksCountAfter() {
+        return kidsLinksCountAfter;
+    }
+
+    public void setKidsLinksCountAfter(int kidsLinksCountAfter) {
+        this.kidsLinksCountAfter = kidsLinksCountAfter;
     }
 }

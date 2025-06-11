@@ -20,5 +20,7 @@ services:
       SSH_PASSWORD: xxx
       NAS_MEDIA_DIR_NAME: xxx
       PLEX_SERVER_TOKEN: xxx
+      TMDB_API_KEY: xxx
+      TMDB_API_BASE_URL: xxx
     volumes:
       - /etc/localtime:/etc/localtime:ro

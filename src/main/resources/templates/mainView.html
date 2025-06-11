@@ -173,13 +173,14 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
                     <span class="badge bg-success me-2">Total: <span th:text="${totalItems}">0</span></span>
-                    <span class="badge bg-success me-2">Movies: <span th:text="${movieItems}">0</span></span>
                     <span class="badge bg-success me-2">TVShows: <span th:text="${tvShowItems}">0</span></span>
+                    <span class="badge bg-success me-2">Movies: <span th:text="${movieItems}">0</span></span>
                     <span class="badge bg-success me-2">Other: <span th:text="${otherItems}">0</span></span>
                 </div>
                 <div>
-                    <span class="badge bg-success me-2">Links in movies_links folder: <span th:text="${moviesLinksCount}">0</span></span>
                     <span class="badge bg-success me-2">Links in tvshows_links folder: <span th:text="${tvShowsLinksCount}">0</span></span>
+                    <span class="badge bg-success me-2">Links in movies_links folder: <span th:text="${moviesLinksCount}">0</span></span>
+                    <span class="badge bg-success me-2">Links in kids_links folder: <span th:text="${kidsLinksCount}">0</span></span>
                     <span id="missingLabel" class="badge bg-success me-2" data-bs-toggle="tooltip" data-bs-placement="top"
                           title="Click to filter items with status 'Missing'"> Missing: <span th:text="${missingLinksCount}">0</span>
                     </span>
@@ -195,6 +196,7 @@
                     <th>Name</th>
                     <th>Type</th>
                     <th>ContentType</th>
+                    <th>Genre</th>
                     <th>Link Status</th>
                 </tr>
                 </thead>
@@ -202,9 +204,10 @@
                 <!-- Loop through the items and populate the table -->
                 <tr th:each="item : ${items}">
                     <td><input type="checkbox" class="select-row"></td>
-                    <td th:text="${item.getName()}"></td>
+                    <td th:text="${item.getName().substring(item.getName().lastIndexOf('/') + 1)}"></td>
                     <td th:text="${item.getType()}"></td>
                     <td th:text="${item.getContentType()}"></td>
+                    <td th:text="${item.getGenre()}"></td>
                     <td th:text="${item.getStatus()}"></td>
                 </tr>
                 </tbody>
@@ -221,7 +224,7 @@
         const table = $('#itemsTable').DataTable({
             responsive: true,
             createdRow: function (row, data, dataIndex) {
-                const status = data[4]; // Index of "Status" column
+                const status = data[5]; // Index of "Status" column
 
                 if (status === 'Not needed') {
                     $(row).addClass('table-secondary'); // gray
@@ -271,7 +274,7 @@
         var toggle = false;
         $('#missingLabel').click(function() {
             if(toggle) {
-                table.column(4).search('').draw();
+                table.column(5).search('').draw();
                 $('#missingLabel').css('font-weight', 'normal');
                 toggle = false;
                 $(this).removeClass('bg-danger').addClass('bg-success');
@@ -280,7 +283,7 @@
                 this.setAttribute('title', "Click to filter items with status 'Missing'");
                 tooltip = new bootstrap.Tooltip(this);
             } else {
-                table.column(4).search('Missing').draw();
+                table.column(5).search('Missing').draw();
                 $('#missingLabel').css('font-weight', 'bold');
                 toggle = true;
                 $(this).removeClass('bg-success').addClass('bg-danger');

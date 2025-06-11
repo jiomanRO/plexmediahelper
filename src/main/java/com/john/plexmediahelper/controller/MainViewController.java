@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -41,6 +39,7 @@ public class MainViewController {
         model.addAttribute("otherItems", countsByType.getOrDefault("Other", 0L));
         model.addAttribute("moviesLinksCount", data.getCurrentMoviesLinks().size());
         model.addAttribute("tvShowsLinksCount", data.getCurrentTVShowsLinks().size());
+        model.addAttribute("kidsLinksCount", data.getCurrentKidsLinks().size());
         Map<String, Long> countsByStatus = data.getAllItemsList().stream()
                 .collect(Collectors.groupingBy(Item::getStatus, Collectors.counting()));
         model.addAttribute("missingLinksCount",countsByStatus.getOrDefault("Missing", 0L));

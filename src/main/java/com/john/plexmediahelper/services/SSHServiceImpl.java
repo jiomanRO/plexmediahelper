@@ -134,7 +134,7 @@ public class SSHServiceImpl implements SSHService {
             String line;
             while ((line = reader.readLine()) != null) {
                 if(!line.equals(dir))
-                    output.add(new Item(line, "dir", "", ""));
+                    output.add(new Item(line, "dir", "", null, ""));
             }
             channel.disconnect();
             //searching for files
@@ -147,7 +147,7 @@ public class SSHServiceImpl implements SSHService {
             reader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
             channel.connect();
             while ((line = reader.readLine()) != null) {
-                    output.add(new Item(line, "file", "", ""));
+                    output.add(new Item(line, "file", "", null, ""));
             }
 
             channel.disconnect();

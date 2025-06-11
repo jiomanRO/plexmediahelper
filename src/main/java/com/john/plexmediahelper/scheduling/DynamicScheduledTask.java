@@ -51,14 +51,19 @@ public class DynamicScheduledTask {
     }
 
     private final Runnable task = () -> {
+        int newRunID = 0;
 
         //keep only the latest 100 runs
         if(executionRunHistory.getRuns().size() > 100) {
             executionRunHistory.getRuns().remove(0);
         }
+        if(executionRunHistory.getRuns().size() > 0)
+            newRunID = executionRunHistory.getRuns().get(executionRunHistory.getRuns().size() - 1).getID() + 1;
+        else
+            newRunID = 1;
 
         ScheduledExecutionRun run = new ScheduledExecutionRun();
-        run.setID(executionRunHistory.getRuns().size()+1);
+        run.setID(newRunID);
         //start
         Date startDate = new java.util.Date();
         LOGGER.info("Running scheduled task at " + startDate);
@@ -74,6 +79,7 @@ public class DynamicScheduledTask {
         run.setOtherCount(countsByType.getOrDefault("Other", 0L).intValue());
         run.setMoviesLinksCountBefore(data.getCurrentMoviesLinks().size());
         run.setTvShowsLinksCountBefore(data.getCurrentTVShowsLinks().size());
+        run.setKidsLinksCountBefore(data.getCurrentKidsLinks().size());
         Map<String, Long> countsByStatus = data.getAllItemsList().stream()
                 .collect(Collectors.groupingBy(Item::getStatus, Collectors.counting()));
         run.setMissingLinksCountBefore(countsByStatus.getOrDefault("Missing", 0L).intValue());
@@ -86,6 +92,7 @@ public class DynamicScheduledTask {
         contentProcessor.getAndProcessContent();
         run.setMoviesLinksCountAfter(data.getCurrentMoviesLinks().size());
         run.setTvShowsLinksCountAfter(data.getCurrentTVShowsLinks().size());
+        run.setKidsLinksCountAfter(data.getCurrentKidsLinks().size());
         countsByStatus = data.getAllItemsList().stream()
                 .collect(Collectors.groupingBy(Item::getStatus, Collectors.counting()));
         run.setMissingLinksCountAfter(countsByStatus.getOrDefault("Missing", 0L).intValue());

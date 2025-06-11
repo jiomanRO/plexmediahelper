@@ -3,6 +3,7 @@ package com.john.plexmediahelper.utilities;
 import com.john.plexmediahelper.model.Data;
 import com.john.plexmediahelper.model.Item;
 import com.john.plexmediahelper.services.SSHService;
+import com.john.plexmediahelper.services.TmdbService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class ContentProcessor {
@@ -22,12 +25,18 @@ public class ContentProcessor {
     @Autowired
     SSHService sshService;
 
+    @Autowired
+    TmdbService tmdbService;
+
     @Value("${nas.media.dir.name}")
     String nasTransmissionDirName;
     @Value("${nas.tvshows_link.dir.name}")
     String nasTVShowsLinkDirName;
     @Value("${nas.movies_link.dir.name}")
     String nasMoviesLinkDirName;
+
+    @Value("${nas.kids_link.dir.name}")
+    String nasKidsLinkDirName;
 
     @Value("#{'${filenames.exceptions}'.split(',')}")
     private List<String> filenamesExceptions;
@@ -39,9 +48,12 @@ public class ContentProcessor {
         //data.setAllFilesAndFoldersList(sshService.getContentOfDir(nasTransmissionDirName));
         data.setCurrentTVShowsLinks(sshService.getContentOfDir(nasTVShowsLinkDirName));
         data.setCurrentMoviesLinks(sshService.getContentOfDir(nasMoviesLinkDirName));
+        data.setCurrentKidsLinks(sshService.getContentOfDir(nasKidsLinkDirName));
         ArrayList<String> invalidLinks = sshService.getInvalidLinks(nasMoviesLinkDirName);
         invalidLinks.addAll(sshService.getInvalidLinks(nasTVShowsLinkDirName));
+        invalidLinks.addAll(sshService.getInvalidLinks(nasKidsLinkDirName));
         data.setInvalidLinks(invalidLinks);
+        //determine content type (Movie, TvShow, Other)
         for(final Item item : data.getAllItemsList()) {
             if(item.getType().equals("dir")) {
                 String dirName = item.getName();
@@ -64,7 +76,8 @@ public class ContentProcessor {
                             item.setStatus("Not needed");
                         } else {
                             item.setContentType("TVShow");
-                            if(data.getCurrentTVShowsLinks().contains(item.getName().substring(nasTransmissionDirName.length()))) {
+                            if(data.getCurrentTVShowsLinks().contains(item.getName().substring(nasTransmissionDirName.length())) ||
+                                    data.getCurrentKidsLinks().contains(item.getName().substring(nasTransmissionDirName.length()))) {
                                 item.setStatus("Present");
                             } else {
                                 item.setStatus("Missing");
@@ -87,7 +100,8 @@ public class ContentProcessor {
                             }
                             if (containsMovieFile) {
                                 item.setContentType("Movie");
-                                if(data.getCurrentMoviesLinks().contains(item.getName().substring(nasTransmissionDirName.length()))) {
+                                if(data.getCurrentMoviesLinks().contains(item.getName().substring(nasTransmissionDirName.length())) ||
+                                        data.getCurrentKidsLinks().contains(item.getName().substring(nasTransmissionDirName.length()))) {
                                     item.setStatus("Present");
                                 } else {
                                     item.setStatus("Missing");
@@ -111,7 +125,8 @@ public class ContentProcessor {
                     item.setContentType("Other");
                     item.setStatus("Not needed");
                 } else {
-                    if(data.getCurrentMoviesLinks().contains(item.getName().substring(nasTransmissionDirName.length()))) {
+                    if(data.getCurrentMoviesLinks().contains(item.getName().substring(nasTransmissionDirName.length())) ||
+                        data.getCurrentKidsLinks().contains(item.getName().substring(nasTransmissionDirName.length()))) {
                         item.setStatus("Present");
                     } else {
                         item.setStatus("Missing");
@@ -119,7 +134,30 @@ public class ContentProcessor {
                 }
             }
         }
+        //determine genre for Movies and TvShows
+        findGenreForMoviesAndTvShows();
+    }
 
+    public void findGenreForMoviesAndTvShows(){
+        for(Item item : data.getAllItemsList()) {
+            if(item.getContentType().equals("Movie") || item.getContentType().equals("TVShow")) {
+                List<String> genreList = tmdbService.getGenres(item);
+                item.setGenre(genreList);
+                LOGGER.info("Genre for " + extractMovieOrShowTitle(item.getName()) + " is: " + genreList);
+            }
+        }
+    }
+
+    public static String extractMovieOrShowTitle(String path) {
+        String filename = path.substring(path.lastIndexOf('/') + 1);
+        // Match from start until season marker (Sxx), year, or resolution
+        Pattern pattern = Pattern.compile("^([A-Za-z0-9\\.']+?)(?:\\.S\\d{2}|\\.(?:19|20)\\d{2})", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(filename);
+        if (matcher.find()) {
+            // Replace dots with spaces, handle apostrophes
+            return matcher.group(1).replace(".", " ");
+        }
+        return "";
     }
 
     public void createLinks() {
@@ -127,13 +165,19 @@ public class ContentProcessor {
         ArrayList<String> createLinksCommands = new ArrayList<>();
         String command;
         for(Item item : data.getAllItemsList()) {
-            if(item.getContentType().equals("TVShow")) {
-                command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasTVShowsLinkDirName) + "\"";
+            //Family movies and tvshows will have links created in the kids link dir
+            if(item.getGenre().contains("Family")) {
+                command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasKidsLinkDirName) + "\"";
                 createLinksCommands.add(command);
             } else {
-                if(item.getContentType().equals("Movie")) {
-                    command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasMoviesLinkDirName) + "\"";
+                if (item.getContentType().equals("TVShow")) {
+                    command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasTVShowsLinkDirName) + "\"";
                     createLinksCommands.add(command);
+                } else {
+                    if (item.getContentType().equals("Movie")) {
+                        command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasMoviesLinkDirName) + "\"";
+                        createLinksCommands.add(command);
+                    }
                 }
             }
         }
@@ -149,13 +193,20 @@ public class ContentProcessor {
         ArrayList<String> createMissingLinksCommands = new ArrayList<>();
         String command;
         for(Item item : data.getAllItemsList()) {
-            if(item.getContentType().equals("TVShow") && item.getStatus().equals("Missing")) {
-                command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasTVShowsLinkDirName) + "\"";
-                createMissingLinksCommands.add(command);
-            } else {
-                if(item.getContentType().equals("Movie") && item.getStatus().equals("Missing")) {
-                    command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasMoviesLinkDirName) + "\"";
+            if(item.getStatus().equals("Missing")) {
+                if(item.getGenre().contains("Family")) {
+                    command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasKidsLinkDirName) + "\"";
                     createMissingLinksCommands.add(command);
+                } else {
+                    if(item.getContentType().equals("TVShow")) {
+                        command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasTVShowsLinkDirName) + "\"";
+                        createMissingLinksCommands.add(command);
+                    } else {
+                        if(item.getContentType().equals("Movie") ) {
+                            command = "ln -s \"" + item.getName() + "\" \"" + item.getName().replace(nasTransmissionDirName, nasMoviesLinkDirName) + "\"";
+                            createMissingLinksCommands.add(command);
+                        }
+                    }
                 }
             }
         }
@@ -173,10 +224,12 @@ public class ContentProcessor {
     public void deleteInvalidLinks() {
         sshService.deleteInvalidLinks(nasTVShowsLinkDirName);
         sshService.deleteInvalidLinks(nasMoviesLinkDirName);
+        sshService.deleteInvalidLinks(nasKidsLinkDirName);
     }
 
     public void deleteAllLinks() {
         sshService.deleteLinks(nasTVShowsLinkDirName);
         sshService.deleteLinks(nasMoviesLinkDirName);
+        sshService.deleteLinks(nasKidsLinkDirName);
     }
 }
