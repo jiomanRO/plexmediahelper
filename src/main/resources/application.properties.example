@@ -4,7 +4,7 @@ server.port=${SERVER_PORT}
 scheduling.timezone=${TIMEZONE}
 
 movies.extensions=.mkv,.mp4
-filenames.exceptions=.*[Uu]demy.*,.*[Ss]killshare.*,.*[Ss]ubs[Pp]lease.*,.*[Cc]ertified.*
+filenames.exceptions=.*[Uu]demy.*,.*[Ss]killshare.*,.*[Ss]ubs[Pp]lease.*,.*[Cc]ertified.*,@eaDir,.*XXX.*
 
 ssh.host=${SSH_HOST}
 ssh.port=${SSH_PORT}
@@ -13,6 +13,7 @@ ssh.password=${SSH_PASSWORD}
 nas.media.dir.name=${NAS_MEDIA_DIR_NAME}
 nas.tvshows_link.dir.name=/volume1/tvshows_links/
 nas.movies_link.dir.name=/volume1/movies_links/
+nas.kids_link.dir.name=/volume1/kids_links/
 
 # run scheduled task auto every day at ten o'clock
 app.scheduling.cron=0 0 10 * * *
