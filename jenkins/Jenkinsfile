@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build and Package') {
+            steps {
+                build job: 'plexmediahelper'
+            }
+        }
+        stage('Deploy to Portainer') {
+            steps {
+                build job: 'redeploy_stack_sh'
+            }
+        }
+    }
+}
