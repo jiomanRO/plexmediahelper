@@ -271,7 +271,7 @@ public class SSHServiceImpl implements SSHService {
     public List<String> getContentOfFolderFromRemoteHost(String folder) {
         //String host = "192.168.1.120";
         //String username = "root";
-        //String password = "lalaoapa"; // Or use private key authentication
+        //String password = "xxx"; // Or use private key authentication
 
         int port = 22; // Default SSH port
 
